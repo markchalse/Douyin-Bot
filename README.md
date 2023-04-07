@@ -2,8 +2,6 @@
 
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badge/) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)      
 
-【markchalse版本】
-
 最近沉迷于抖音无法自拔，常常花好几个小时在抖音**漂亮小姐姐**身上。
 
 本着**高效、直接**地找到漂亮小姐姐的核心思想，我用 Python + ADB 做了一个 Python 抖音机器人 Douyin-Bot。
@@ -64,3 +62,51 @@ MIT
 <p align="center">
 <img src="screenshot/qrcode.jpg" title="Logo" width="150">
 </>
+
+------------------------------------------------------------------------------------
+## 【markchalse版本2023.4.6】
+
+## 【腾讯云人脸识别服务】
+
+[选购](https://cloud.tencent.com/product/facerecognition?fromSource=gwzcw.3561167.3561167.3561167&utm_medium=cpc&utm_id=gwzcw.3561167.3561167.3561167)
+
+可选购 (调用次数，人脸检测与分析，10万次)
+<img src="./img/tenxun.png"  title="buy"  width="900">
+
+## 【配置API ID 和 密码】
+
+[腾讯云-访问管理-访问秘钥-API秘钥管理-新建秘钥](https://console.cloud.tencent.com/cam/capi)
+
+<img src="./img/api_key.png" title="apikey" width="600">
+
+## 【写入SecretId 及 SecretKey】
+
+更新douyin-bot.py文件中的SecretId SecretKey
+
+<img src="./img/douyin_botidkey.png" title="apikey" width="400">
+
+## 【安装腾讯云python SDK】
+
+python3
+
+pip3 install tencentcloud-sdk-python-cvm
+
+
+## 【配置手机屏幕】
+
+手机屏幕不是1920x1080的话，根据程序提示的分辨率，需要再config文件夹下新建文件夹如2400x1080
+
+文件夹内拷贝一个config.json
+
+其中follow_bottom是关注 ，star_bottom是点赞 ， comment_bottom是评论
+
+ps: x 是由左向右的像素，y 是由上向下的像素
+
+
+
+## 【联系QQ】
+
+915730705
+
+【end】
+------------------------------------------------------------------------------------

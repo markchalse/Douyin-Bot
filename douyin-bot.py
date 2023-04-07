@@ -5,6 +5,17 @@ import time
 from PIL import Image
 import argparse
 
+###
+#markchalse
+import base64
+import json
+from tencentcloud.common import credential
+from tencentcloud.common.profile.client_profile import ClientProfile
+from tencentcloud.common.profile.http_profile import HttpProfile
+from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
+from tencentcloud.iai.v20200303 import iai_client, models
+###
+
 if sys.version_info.major != 3:
     print('Please run under Python3')
     exit(1)
@@ -26,6 +37,9 @@ VERSION = "0.0.1"
 AppID = '1106858595'
 AppKey = 'bNUNgOpY6AeeJjFu'
 
+SecretId = ""
+SecretKey = ""
+
 DEBUG_SWITCH = True
 FACE_PATH = 'face/'
 
@@ -38,6 +52,31 @@ BEAUTY_THRESHOLD = 80
 
 # 最小年龄
 GIRL_MIN_AGE = 14
+
+
+##markchalse
+def get_face_new(image_code):
+    cred = credential.Credential(SecretId, SecretKey)
+    httpProfile = HttpProfile()
+    httpProfile.endpoint = "iai.tencentcloudapi.com"
+    clientProfile = ClientProfile()
+    clientProfile.httpProfile = httpProfile
+    client = iai_client.IaiClient(cred, "ap-beijing", clientProfile)
+    req = models.DetectFaceAttributesRequest()
+    params = {
+        "Action":'DetectFaceAttributes',
+        "Version":'2020-03-03',
+        'Region':'ap-beijing',
+        "Image": image_code,
+        "FaceAttributesType": "Beauty,Age",
+        "MaxFaceNum":6
+    }
+    req.from_json_string(json.dumps(params))
+    resp = client.DetectFaceAttributes(req)
+    
+    result = json.loads(resp.to_json_string())
+    
+    return result
 
 
 def yes_or_no():
@@ -161,7 +200,7 @@ def main():
     while True:
         next_page()
 
-        time.sleep(1)
+        time.sleep(9)
         screenshot.pull_screenshot()
 
         resize_image('autojump.png', 'optimized.png', 1024*1024)
@@ -169,11 +208,52 @@ def main():
         with open('optimized.png', 'rb') as bin_data:
             image_data = bin_data.read()
 
-        ai_obj = apiutil.AiPlat(AppID, AppKey)
-        rsp = ai_obj.face_detectface(image_data, 0)
+        #ai_obj = apiutil.AiPlat(AppID, AppKey)
+        #rsp = ai_obj.face_detectface(image_data, 0)
+        try:
+            rsp = get_face_new(base64.b64encode(image_data).decode("utf-8"))
+        except TencentCloudSDKException as err:
+            print(err)
+            continue
 
         major_total = 0
         minor_total = 0
+        faces = rsp['FaceDetailInfos']
+        Max_beauty = 0
+        i = 0
+        for face in faces:
+            gender = face['FaceDetailAttributesInfo']['Gender']['Type']
+            beauty = face['FaceDetailAttributesInfo']['Beauty']
+            age = face['FaceDetailAttributesInfo']['Age']
+            print ('gender',gender,'beauty',beauty,'age',age)
+            face_area = (face['FaceRect']['X'], face['FaceRect']['Y'], face['FaceRect']['X']+face['FaceRect']['Width'], face['FaceRect']['Y']+face['FaceRect']['Height'])
+            img = Image.open("optimized.png")
+            cropped_img = img.crop(face_area).convert('RGB')
+            #cropped_img.save(FACE_PATH + face['face_id'] + '.png')
+            cropped_img.save(FACE_PATH + rsp['RequestId']+str(i) + '.png')
+            # 性别判断
+            if beauty > Max_beauty and age < 30 and gender>0:
+                Max_beauty = beauty
+            i+=1
+
+            
+            #if face['age'] > GIRL_MIN_AGE:
+            #    major_total += 1
+            #else:
+            #    minor_total += 1
+            
+        # 是个美人儿~关注点赞走一波
+            #if beauty > BEAUTY_THRESHOLD and major_total > minor_total:
+            if Max_beauty > BEAUTY_THRESHOLD:
+                print('发现漂亮妹子！！！')
+                thumbs_up()
+                follow_user()
+
+                if cmd_args['reply']:
+                    auto_reply()
+
+            
+        '''
 
         if rsp['ret'] == 0:
             beauty = 0
@@ -211,9 +291,13 @@ def main():
         else:
             print(rsp)
             continue
+        '''
 
 
 if __name__ == '__main__':
+    if SecretId=="" or SecretKey == "":
+        print ("请先设置NEW_ID和NEW_KEY ！")
+        sys.exit(0)
     try:
         # yes_or_no()
         main()

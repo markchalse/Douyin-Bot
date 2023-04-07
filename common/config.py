@@ -46,8 +46,11 @@ def _get_screen_size():
     """
     获取手机屏幕大小
     """
+    print ('获取手机屏幕大小')
     size_str = adb.get_screen()
     m = re.search(r'(\d+)x(\d+)', size_str)
     if m:
+        print ("{height}x{width}".format(height=m.group(2), width=m.group(1)))
         return "{height}x{width}".format(height=m.group(2), width=m.group(1))
+    print ("1920x1080")
     return "1920x1080"
